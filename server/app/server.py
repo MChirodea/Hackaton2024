@@ -6,15 +6,19 @@ from fastapi.middleware.cors import CORSMiddleware
 import json
 import uvicorn
 import requests
-import pandas as pd
 import time
 import re
 
 from onnxruntime.transformers.models.longformer.benchmark_longformer import test_torch
 
+from packages.model.input.review import ReviewsInput
+from packages.model.model import LLMBrillio
+from packages.example.reviews import product
+
 load_dotenv()
 
 app = FastAPI()
+
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +27,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+model = LLMBrillio()
 
 @app.get("/")
 async def root() -> dict[str, str]:
@@ -105,6 +111,40 @@ async def emag(url: str):
 
 def send_data_to_openai(data):
     llm = ChatOpenAI(model="gpt-4o-mini")
+
+@app.get("/review/example")
+async def calculate_review_trustworthiness():
+    response = model.generate_response(product)
+    return response
+
+@app.get("/review")
+async def calculate_review_trustworthiness(input: ReviewsInput):
+    response = model.generate_response(input)
+    return response
+
+def convert_api_response_to_api_input(reviews, product_description, product_specifications):
+    formatted_reviews = []
+    for review in reviews:
+        formatted_reviews.append(ReviewsInput.ReviewInput(
+            id=review["id"],
+            author_id=str(review["author_id"]),
+            author_name=review["author_name"],
+            title=review["title"],
+            description=review["description"],
+            rating=review["rating"],
+            votes=review["votes"],
+            published_on=review["published_on"],
+            has_bought_product=review["has_bought_product"]
+        ))
+
+    input_data = ReviewsInput(
+        description=product_description,
+        specifications=product_specifications,
+        reviews=formatted_reviews
+    )
+
+    return input_data
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
