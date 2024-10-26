@@ -1,3 +1,4 @@
+import json
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,7 +6,9 @@ import uvicorn
 import requests
 import time
 import re
-
+import os
+from upstash_redis import Redis
+from packages.model.input.review import ReviewsInput
 from packages.model.input.review import ReviewInput, ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
@@ -31,21 +34,33 @@ async def root() -> dict[str, str]:
 
 @app.post("/analyze")
 async def analyze(data: dict):
+    redis = Redis(url="https://correct-mullet-20638.upstash.io", token=os.environ("REDIS_TOKEN"))
+
+    base_url = get_url(data['url'])
+
+    redis_product_revies_key = f"reviews:{base_url}"
+    redis_product_review_count_key = f"review-count:{base_url}"
+
     number_of_reviews = data['total_reviews']
-    number_of_cached_reviews = 0
+    number_of_cached_reviews = -1
+    if redis.exists(redis_product_review_count_key):
+        number_of_cached_reviews = int(redis.get(redis_product_review_count_key))
+    else:
+        redis.set(redis_product_review_count_key, number_of_reviews)
+
     if number_of_reviews != number_of_cached_reviews:
         # Fetch all reviews
-        reviews = await get_reviews(data['url'])
+        reviews = await get_reviews(base_url)
+        redis.set(redis_product_revies_key, str(reviews))
     else:
         # Fetch cached reviews
-        reviews = data['reviews']
+        reviews = json.loads(redis.get(redis_product_revies_key))
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
     return response
 
-async def get_reviews(url: str):
-    # Base URL for the API endpoint
+def get_url(url: str):
     start_pattern = "^https://www.emag.ro/"
     url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
     end_pattern = "\\?|#(.*)"
@@ -54,8 +69,11 @@ async def get_reviews(url: str):
         result = re.sub(end_pattern, 'reviews/list', url)
     else:
         result = url + 'reviews/list'
+    
+    return result 
 
-    base_url = result
+
+async def get_reviews(base_url: str):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
     }
@@ -147,4 +165,4 @@ def convert_api_response_to_api_input(reviews, product_description, product_spec
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="192.168.40.195", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)
