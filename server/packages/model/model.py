@@ -98,10 +98,11 @@ class LLMBrillio:
         return model
 
     def generate_response(self, input: ReviewsInput) -> ReviewsResponse:
+        message = input.format_reviews()
         retrieval_chain = (
             {"question": RunnablePassthrough()}
             | self.prompt
             | self.llm
 )
 
-        return retrieval_chain.invoke(input.format_reviews())
+        return retrieval_chain.invoke(message)
