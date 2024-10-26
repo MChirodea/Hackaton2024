@@ -34,14 +34,15 @@ model = LLMBrillio()
 async def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
-@app.post("/send-ext-data")
-async def send_data(data: dict):
-    reviews = await emag(data['url'])
-    data['reviews'] = reviews
-    return reviews
+@app.post("/analyze")
+async def analyze(data: dict):
+    reviews = await get_reviews(data['url'])
+    formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
+    reviews_trustworthiness = calculate_review_trustworthiness(formatted_reviews)
 
-@app.get("/emag")
-async def emag(url: str):
+    return reviews_trustworthiness
+
+async def get_reviews(url: str):
     # Base URL for the API endpoint
     start_pattern = "^https://www.emag.ro/"
     url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
