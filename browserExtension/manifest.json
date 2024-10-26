@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Detect Fake Reviews",
+    "description": "This extension will help you to detect fake reviews on ecom",
+    "version": "1.0",
+    "action": {
+      "default_popup": "index.html"
+    },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "permissions": [
+        "scripting",
+        "tabs"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ]
+  }
