@@ -31,7 +31,15 @@ async def root() -> dict[str, str]:
 
 @app.post("/analyze")
 async def analyze(data: dict):
-    reviews = await get_reviews(data['url'])
+    number_of_reviews = data['total_reviews']
+    number_of_cached_reviews = 0
+    if number_of_reviews != number_of_cached_reviews:
+        # Fetch all reviews
+        reviews = await get_reviews(data['url'])
+    else:
+        # Fetch cached reviews
+        reviews = data['reviews']
+
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
     return response
