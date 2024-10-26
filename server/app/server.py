@@ -79,7 +79,6 @@ async def emag():
 
 @app.get("/review/example")
 async def calculate_review_trustworthiness():
-    #TODO get product
     response = model.generate_response(product)
     return response
 
