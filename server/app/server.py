@@ -87,6 +87,29 @@ async def calculate_review_trustworthiness(input: ReviewsInput):
     response = model.generate_response(input)
     return response
 
+def convert_api_response_to_api_input(reviews, product_description, product_specifications):
+    formatted_reviews = []
+    for review in reviews:
+        formatted_reviews.append(ReviewsInput.ReviewInput(
+            id=review["id"],
+            author_id=str(review["author_id"]),
+            author_name=review["author_name"],
+            title=review["title"],
+            description=review["description"],
+            rating=review["rating"],
+            votes=review["votes"],
+            published_on=review["published_on"],
+            has_bought_product=review["has_bought_product"]
+        ))
+
+    input_data = ReviewsInput(
+        description=product_description,
+        specifications=product_specifications,
+        reviews=formatted_reviews
+    )
+
+    return input_data
+
 
 if __name__ == "__main__":
     import uvicorn
