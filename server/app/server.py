@@ -1,14 +1,15 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
 import requests
-import pandas as pd
 import time
+
+from packages.model.model import LLMBrillio
+from packages.example.reviews import product
 
 load_dotenv()
 
 app = FastAPI()
-# llm = ChatOpenAI(model="gpt-4o-mini")
+model = LLMBrillio()
 
 @app.get("/")
 async def root() -> dict[str, str]:
@@ -75,6 +76,13 @@ async def emag():
     return all_reviews
 
 
+@app.get("/review")
+async def calculate_review_trustworthiness():
+    #TODO get product
+    response = model.generate_response(product)
+    return response
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="localhost", port=8081)
