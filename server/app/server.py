@@ -44,14 +44,13 @@ async def analyze(data: dict):
     number_of_reviews = data['total_reviews']
     number_of_cached_reviews = -1
     if redis.exists(redis_product_review_count_key):
-        number_of_cached_reviews = redis.get(redis_product_review_count_key)
+        number_of_cached_reviews = int(redis.get(redis_product_review_count_key))
     else:
         redis.set(redis_product_review_count_key, number_of_reviews)
 
-
     if number_of_reviews != number_of_cached_reviews:
         # Fetch all reviews
-        reviews = await get_reviews(data['url'])
+        reviews = await get_reviews(base_url)
         redis.set(redis_product_revies_key, str(reviews))
     else:
         # Fetch cached reviews
