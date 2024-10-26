@@ -1,13 +1,15 @@
 import os
 from langchain_openai import ChatOpenAI
 
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 from packages.model.input.review import ReviewsInput
 from packages.model.output.review import ReviewsResponse
+from langchain_core.runnables import RunnablePassthrough
 
 
-prompt_template="""
+system_prompt="""
     You are tasked with analyzing a set of product reviews to determine their authenticity. For each review, assess and answer the following yes/no questions based on specific indicators commonly associated with fake reviews.
     GENERATE AN ENTRY IN THE OUTPUT FOR EACH REVIEW THAT THE USER GAVE. EACH ENTRY NEEDS TO BE LINKED TO IT'S CORRESPONDING REVIEW FROM THE USER.
 
@@ -79,17 +81,16 @@ prompt_template="""
                 Title: Great product!
                 Description: Loved using it. Highly recommend!
                 Published On: 2024-10-25 14:30:00
-          
-    These are the reviews provided by the user:
-
-        {reviews}
 """
 
 
 class LLMBrillio:
     def __init__(self, model_name: str = "gpt-4o-mini", key: str = os.environ["OPENAI_API_KEY"]):
         self.llm = self.__init_llm(model_name, key)
-        self.prompt = PromptTemplate.from_template(prompt_template)
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", system_prompt),
+            ("user", "{question}"),
+        ])
     
     @staticmethod
     def __init_llm(model_name: str, key: str):
@@ -97,8 +98,10 @@ class LLMBrillio:
         return model
 
     def generate_response(self, input: ReviewsInput) -> ReviewsResponse:
-        actual_prompt = self.prompt.format(
-            reviews=input.format_reviews()
-        )
+        retrieval_chain = (
+            {"question": RunnablePassthrough()}
+            | self.prompt
+            | self.llm
+)
 
-        return self.llm.invoke(actual_prompt)
+        return retrieval_chain.invoke(input.format_reviews())
