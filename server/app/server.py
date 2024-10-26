@@ -15,21 +15,19 @@ app = FastAPI()
 async def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
-@app.put("/send-ext-data")
+@app.post("/send-ext-data")
 async def send_data(jsonstring):
     data = json.load(jsonstring)
 
-    # for k, v in data.items():
-    #     print(k, v)
+    reviews = await emag(data['url'])
+    data['reviews'] = reviews
+    
     return {"message": data}
 
-def send_data_to_openai(data):
-    llm = ChatOpenAI(model="gpt-4o-mini")
-
 @app.get("/emag")
-async def emag():
+async def emag(url):
     # Base URL for the API endpoint
-    base_url = "https://www.emag.ro/product-feedback/consola-playstation-5-digital-edition-ps5-slim-1tb-ssd-d-chassis-1000040668/pd/D1NVNKYBM/reviews/list"
+    base_url = url
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
     }
@@ -85,6 +83,9 @@ async def emag():
         time.sleep(1)  # Add a delay to avoid hitting the API rate limit
 
     return all_reviews
+
+def send_data_to_openai(data):
+    llm = ChatOpenAI(model="gpt-4o-mini")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
