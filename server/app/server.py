@@ -16,13 +16,12 @@ async def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
 @app.post("/send-ext-data")
-async def send_data(jsonstring):
-    data = json.load(jsonstring)
+async def send_data(jsonstring: dict):
+    print(jsonstring)
+    # data = json.load(jsonstring)
 
-    reviews = await emag(data['url'])
-    data['reviews'] = reviews
-
-    return {"message": data}
+    # reviews = await emag(data['url'])
+    # data['reviews'] = reviews
 
 @app.get("/emag")
 async def emag(url):
