@@ -15,6 +15,7 @@ uvicorn = "^0.23.2"
 langserve = {extras = ["server"], version = ">=0.0.30"}
 pydantic = "^2.8.2"
 langgraph = "^0.2.34"
+pandas = "^2.2.3"
 
 
 [tool.poetry.group.dev.dependencies]
