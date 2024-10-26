@@ -11,7 +11,7 @@ import re
 
 from onnxruntime.transformers.models.longformer.benchmark_longformer import test_torch
 
-from packages.model.input.review import ReviewsInput
+from packages.model.input.review import ReviewInput, ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
 
@@ -38,9 +38,8 @@ async def root() -> dict[str, str]:
 async def analyze(data: dict):
     reviews = await get_reviews(data['url'])
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
-    reviews_trustworthiness = calculate_review_trustworthiness(formatted_reviews)
-
-    return reviews_trustworthiness
+    response = model.generate_response(formatted_reviews)
+    return response
 
 async def get_reviews(url: str):
     # Base URL for the API endpoint
@@ -115,17 +114,17 @@ async def calculate_review_trustworthiness():
     response = model.generate_response(product)
     return response
 
-@app.get("/review")
-async def calculate_review_trustworthiness(input: ReviewsInput):
+@app.post("/review")
+async def calculate_review_trustworthiness_with_input(input: ReviewsInput):
     response = model.generate_response(input)
     return response
 
 def convert_api_response_to_api_input(reviews, product_description, product_specifications):
     formatted_reviews = []
     for review in reviews:
-        formatted_reviews.append(ReviewsInput.ReviewInput(
+        formatted_reviews.append(ReviewInput(
             id=review["id"],
-            author_id=str(review["author_id"]),
+            author_id=review["author_id"],
             author_name=review["author_name"],
             title=review["title"],
             description=review["description"],
@@ -145,4 +144,4 @@ def convert_api_response_to_api_input(reviews, product_description, product_spec
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="192.168.40.195", port=8000)
