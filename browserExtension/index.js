@@ -35,6 +35,18 @@ async function detectFakeReviews() {
             console.log(currentLocation);
             let reviewRows = getReviewRows();
 
+            fetch('http://localhost:8000/send-ext-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: currentLocation,
+                    description: getDescriptionBody().innerText,
+                    specifications: getSpecifications().innerText
+                }),
+            })
+
             // loop through all elements
             for (let element of reviewRows) {
                 
