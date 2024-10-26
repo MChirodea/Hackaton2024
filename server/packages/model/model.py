@@ -9,6 +9,7 @@ from packages.model.output.review import ReviewsResponse
 
 prompt_template="""
     You are tasked with analyzing a set of product reviews to determine their authenticity. For each review, assess and answer the following yes/no questions based on specific indicators commonly associated with fake reviews.
+    GENERATE AN ENTRY IN THE OUTPUT FOR EACH REVIEW THAT THE USER GAVE. EACH ENTRY NEEDS TO BE LINKED TO IT'S CORRESPONDING REVIEW FROM THE USER.
 
     The questions to be answered are the following:
         Q01. Is the review very similar to at least another one in the list, and both have the rating?
@@ -42,6 +43,43 @@ prompt_template="""
         Language Tone Analysis: Check for consistent tone or repeated language among various reviews from different users.
         External Data Points: Integrate data from other sources like IP location checks or account activity.
 
+    Use the following context for the format of the user input:
+        Product Description: (The description of the product)
+        Product Specifications: (The specifications of the product)
+        
+        Review (1 to N):
+            Rating: (The rating of the review)
+            Author ID: (The id of the author who made the review)
+            Author Name: (The name of the author who made the review)
+            Title: (Review title)
+            Description: (Review description)
+            Published On: (Publish date)
+
+        Example Input:
+            Review 1:
+                Rating: 5/5
+                Author ID: 001
+                Author Name: Alice
+                Title: Great product!
+                Description: Loved using it. Highly recommend!
+                Published On: 2024-10-25 14:30:00
+
+            Review 2:
+                Rating: 5/5
+                Author ID: 002
+                Author Name: Alices
+                Title: Great products!
+                Description: Loved using them. Highly recommend!
+                Published On: 2024-10-25 14:30:05
+            
+            Review 3:
+                Rating: 5/5
+                Author ID: 003
+                Author Name: Alice
+                Title: Great product!
+                Description: Loved using it. Highly recommend!
+                Published On: 2024-10-25 14:30:00
+          
     These are the reviews provided by the user:
 
         {reviews}
