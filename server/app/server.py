@@ -109,9 +109,6 @@ async def emag(url: str):
 
     return all_reviews
 
-def send_data_to_openai(data):
-    llm = ChatOpenAI(model="gpt-4o-mini")
-
 @app.get("/review/example")
 async def calculate_review_trustworthiness():
     response = model.generate_response(product)
