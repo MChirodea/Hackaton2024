@@ -2,31 +2,51 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langchain_openai import ChatOpenAI
+from fastapi.middleware.cors import CORSMiddleware
 import json
 import uvicorn
 import requests
 import pandas as pd
 import time
+import re
+
+from onnxruntime.transformers.models.longformer.benchmark_longformer import test_torch
 
 load_dotenv()
 
 app = FastAPI()
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/")
 async def root() -> dict[str, str]:
     return {"message": "Hello World"}
 
 @app.post("/send-ext-data")
-async def send_data(jsonstring: dict):
-    print(jsonstring)
-    # data = json.load(jsonstring)
-
-    # reviews = await emag(data['url'])
-    # data['reviews'] = reviews
+async def send_data(data: dict):
+    reviews = await emag(data['url'])
+    data['reviews'] = reviews
+    return reviews
 
 @app.get("/emag")
-async def emag(url):
+async def emag(url: str):
     # Base URL for the API endpoint
-    base_url = url
+    start_pattern = "^https://www.emag.ro/"
+    url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
+    end_pattern = "\\?(.*)"
+    x = re.search(end_pattern, url)
+    if x is not None:
+        result = re.sub(end_pattern, 'reviews/list', url)
+    else:
+        result = url + 'reviews/list'
+
+    base_url = result
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
     }
