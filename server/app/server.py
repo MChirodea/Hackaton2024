@@ -1,14 +1,16 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
 import requests
-import pandas as pd
 import time
+
+from packages.model.input.review import ReviewsInput
+from packages.model.model import LLMBrillio
+from packages.example.reviews import product
 
 load_dotenv()
 
 app = FastAPI()
-# llm = ChatOpenAI(model="gpt-4o-mini")
+model = LLMBrillio()
 
 @app.get("/")
 async def root() -> dict[str, str]:
@@ -73,6 +75,17 @@ async def emag():
         time.sleep(1)  # Add a delay to avoid hitting the API rate limit
 
     return all_reviews
+
+
+@app.get("/review/example")
+async def calculate_review_trustworthiness():
+    response = model.generate_response(product)
+    return response
+
+@app.get("/review")
+async def calculate_review_trustworthiness(input: ReviewsInput):
+    response = model.generate_response(input)
+    return response
 
 
 if __name__ == "__main__":
