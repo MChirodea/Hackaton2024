@@ -1,3 +1,4 @@
+import ast
 import json
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -54,7 +55,7 @@ async def analyze(data: dict):
         redis.set(redis_product_reviews_key, str(reviews))
     else:
         # Fetch cached reviews
-        reviews = json.loads(redis.get(redis_product_reviews_key))
+        reviews = ast.literal_eval(redis.get(redis_product_reviews_key))
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
