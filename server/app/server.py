@@ -34,7 +34,7 @@ async def root() -> dict[str, str]:
 
 @app.post("/analyze")
 async def analyze(data: dict):
-    redis = Redis(url="https://correct-mullet-20638.upstash.io", token=os.environ("REDIS_TOKEN"))
+    redis = Redis(url="https://correct-mullet-20638.upstash.io", token=os.environ["REDIS_TOKEN"])
 
     base_url = get_url(data['url'])
 
