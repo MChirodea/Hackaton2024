@@ -17,9 +17,13 @@ pydantic = "^2.8.2"
 langgraph = "^0.2.34"
 pandas = "^2.2.3"
 
-
 [tool.poetry.group.dev.dependencies]
 langchain-cli = ">=0.0.31"
+langchain=">=0.2.16"
+langchain-openai=">=0.2.3"
+torch=">=2.5.0"
+transformers=">=4.46.0"
+onnxruntime=">=1.19.2"
 
 [build-system]
 requires = ["poetry-core"]
