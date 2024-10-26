@@ -10,7 +10,7 @@ import time
 import re
 
 from onnxruntime.transformers.models.longformer.benchmark_longformer import test_torch
-
+from upstash_redis import Redis
 from packages.model.input.review import ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
@@ -54,6 +54,14 @@ async def get_reviews(url: str):
         result = url + 'reviews/list'
 
     base_url = result
+
+    redis_key = f"store-reviews:{current_number_of_reviews}:{base_url}"
+    # Check if value exists in Redis, if yes return it
+    redis = Redis(url="https://correct-mullet-20638.upstash.io", token="********")
+
+    if redis.exists(redis_key):
+        return redis.get(redis_key)
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
     }
@@ -107,6 +115,11 @@ async def get_reviews(url: str):
 
         offset = offset + limit
         time.sleep(1)  # Add a delay to avoid hitting the API rate limit
+
+    redis_key = f"store-reviews:{len(all_reviews)}:{base_url}"
+
+    # Cache all_reviews
+    redis.set(redis_key, all_reviews)
 
     return all_reviews
 
