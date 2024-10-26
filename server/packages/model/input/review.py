@@ -1,16 +1,17 @@
 from datetime import datetime
+from typing import Optional, Union
 from pydantic import BaseModel, Field
 
 class ReviewInput(BaseModel):
     id: int = Field(..., description="ID of the review")
-    author_id: int = Field(..., description="ID of the author")
-    author_name: str = Field(..., description="Name of the author")
-    title: str = Field(..., description="Title of the review")
-    description: str = Field(..., description="Description of the review")
-    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
-    votes: int = Field(..., ge=0, description="Votes on the review")
-    published_on: datetime = Field(..., description="Date and time of publishing")
-    has_bought_product: bool = Field(..., description="True if the review is verified as bought")
+    author_id: Union[int,str,None] = Field(..., description="ID of the author")
+    author_name: Optional[str] = Field(..., description="Name of the author")
+    title: Optional[str] = Field(..., description="Title of the review")
+    description: Optional[str] = Field(..., description="Description of the review")
+    rating: Optional[int] = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+    votes: Optional[int] = Field(..., ge=0, description="Votes on the review")
+    published_on: Optional[datetime] = Field(..., description="Date and time of publishing")
+    has_bought_product: Optional[bool] = Field(..., description="True if the review is verified as bought")
 
     def format_review(self, index: int) -> str:
         return (

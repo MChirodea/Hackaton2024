@@ -1,17 +1,14 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
-from langchain_openai import ChatOpenAI
 from fastapi.middleware.cors import CORSMiddleware
-import json
 import uvicorn
 import requests
 import time
 import re
-
-from onnxruntime.transformers.models.longformer.benchmark_longformer import test_torch
+import os
 from upstash_redis import Redis
 from packages.model.input.review import ReviewsInput
+from packages.model.input.review import ReviewInput, ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
 
@@ -36,32 +33,47 @@ async def root() -> dict[str, str]:
 
 @app.post("/analyze")
 async def analyze(data: dict):
-    reviews = await get_reviews(data['url'])
+    redis = Redis(url="https://correct-mullet-20638.upstash.io", token=os.environ("REDIS_TOKEN"))
+
+    base_url = get_url(data['url'])
+
+    redis_product_revies_key = f"reviews:{base_url}"
+    redis_product_review_count_key = f"review-count:{base_url}"
+
+    number_of_reviews = data['total_reviews']
+    number_of_cached_reviews = 0
+    if redis.exists(redis_product_review_count_key):
+        number_of_cached_reviews = redis.get(redis_product_review_count_key)
+    else:
+        redis.set(redis_product_review_count_key, number_of_reviews)
+
+
+    if number_of_reviews != number_of_cached_reviews:
+        # Fetch all reviews
+        reviews = await get_reviews(data['url'])
+        redis.set(redis_product_revies_key, reviews)
+    else:
+        # Fetch cached reviews
+        reviews = redis.get(redis_product_revies_key)
+
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
-    reviews_trustworthiness = calculate_review_trustworthiness(formatted_reviews)
+    response = model.generate_response(formatted_reviews)
+    return response
 
-    return reviews_trustworthiness
-
-async def get_reviews(url: str):
-    # Base URL for the API endpoint
+def get_url(url: str):
     start_pattern = "^https://www.emag.ro/"
     url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
-    end_pattern = "\\?(.*)"
+    end_pattern = "\\?|#(.*)"
     x = re.search(end_pattern, url)
     if x is not None:
         result = re.sub(end_pattern, 'reviews/list', url)
     else:
         result = url + 'reviews/list'
+    
+    return result 
 
-    base_url = result
 
-    redis_key = f"store-reviews:{current_number_of_reviews}:{base_url}"
-    # Check if value exists in Redis, if yes return it
-    redis = Redis(url="https://correct-mullet-20638.upstash.io", token="********")
-
-    if redis.exists(redis_key):
-        return redis.get(redis_key)
-
+async def get_reviews(base_url: str):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
     }
@@ -116,11 +128,6 @@ async def get_reviews(url: str):
         offset = offset + limit
         time.sleep(1)  # Add a delay to avoid hitting the API rate limit
 
-    redis_key = f"store-reviews:{len(all_reviews)}:{base_url}"
-
-    # Cache all_reviews
-    redis.set(redis_key, all_reviews)
-
     return all_reviews
 
 @app.get("/review/example")
@@ -128,17 +135,17 @@ async def calculate_review_trustworthiness():
     response = model.generate_response(product)
     return response
 
-@app.get("/review")
-async def calculate_review_trustworthiness(input: ReviewsInput):
+@app.post("/review")
+async def calculate_review_trustworthiness_with_input(input: ReviewsInput):
     response = model.generate_response(input)
     return response
 
 def convert_api_response_to_api_input(reviews, product_description, product_specifications):
     formatted_reviews = []
     for review in reviews:
-        formatted_reviews.append(ReviewsInput.ReviewInput(
+        formatted_reviews.append(ReviewInput(
             id=review["id"],
-            author_id=str(review["author_id"]),
+            author_id=review["author_id"],
             author_name=review["author_name"],
             title=review["title"],
             description=review["description"],
@@ -158,4 +165,4 @@ def convert_api_response_to_api_input(reviews, product_description, product_spec
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="192.168.40.195", port=8000)
