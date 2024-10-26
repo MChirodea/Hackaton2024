@@ -1,12 +1,12 @@
-FROM python:3.12.3
+FROM python:3.12.7
 
-RUN pip install poetry==1.8.3
+RUN pip install poetry==1.8.4
 
 RUN poetry config virtualenvs.create false
 
 WORKDIR /code
 
-COPY ./pyproject.toml ./README.md ./poetry.lock* ./
+COPY ./pyproject.toml ./README.md ./
 
 COPY ./package[s] ./packages
 
