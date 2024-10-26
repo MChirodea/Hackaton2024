@@ -46,7 +46,7 @@ async def get_reviews(url: str):
     # Base URL for the API endpoint
     start_pattern = "^https://www.emag.ro/"
     url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
-    end_pattern = "\\?(.*)"
+    end_pattern = "\\?|#(.*)"
     x = re.search(end_pattern, url)
     if x is not None:
         result = re.sub(end_pattern, 'reviews/list', url)
