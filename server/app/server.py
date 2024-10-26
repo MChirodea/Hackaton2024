@@ -1,15 +1,10 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
-from langchain_openai import ChatOpenAI
 from fastapi.middleware.cors import CORSMiddleware
-import json
 import uvicorn
 import requests
 import time
 import re
-
-from onnxruntime.transformers.models.longformer.benchmark_longformer import test_torch
 
 from packages.model.input.review import ReviewInput, ReviewsInput
 from packages.model.model import LLMBrillio
@@ -36,7 +31,15 @@ async def root() -> dict[str, str]:
 
 @app.post("/analyze")
 async def analyze(data: dict):
-    reviews = await get_reviews(data['url'])
+    number_of_reviews = data['total_reviews']
+    number_of_cached_reviews = 0
+    if number_of_reviews != number_of_cached_reviews:
+        # Fetch all reviews
+        reviews = await get_reviews(data['url'])
+    else:
+        # Fetch cached reviews
+        reviews = data['reviews']
+
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
     return response
@@ -45,7 +48,7 @@ async def get_reviews(url: str):
     # Base URL for the API endpoint
     start_pattern = "^https://www.emag.ro/"
     url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
-    end_pattern = "\\?(.*)"
+    end_pattern = "\\?|#(.*)"
     x = re.search(end_pattern, url)
     if x is not None:
         result = re.sub(end_pattern, 'reviews/list', url)
