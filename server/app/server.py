@@ -91,4 +91,4 @@ async def calculate_review_trustworthiness(input: ReviewsInput):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8081)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
