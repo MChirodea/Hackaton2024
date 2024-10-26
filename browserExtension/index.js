@@ -9,7 +9,7 @@ async function detectFakeReviews() {
             function getDescriptionBody() {
                 // get all reviews text by class name 'review-body-container'
                 let description = document.getElementById('description-body');
-            
+
                 console.log(description);
                 console.log(description.innerText);
 
@@ -36,7 +36,7 @@ async function detectFakeReviews() {
             let reviewRows = getReviewRows();
 
             try {
-                await fetch('http://localhost:8000/send-ext-data', {
+                await fetch('http://localhost:8000/analyze', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ async function detectFakeReviews() {
 
             // loop through all elements
             for (let element of reviewRows) {
-                
+
                 // change the background color of the element
                 element.style.position = 'relative';
 
@@ -69,7 +69,7 @@ async function detectFakeReviews() {
                 let badgeWrapper = document.createElement('div');
                 badgeWrapper.style.display = 'inline-block';
                 badgeWrapper.style.marginLeft = '24px';
-                badgeWrapper.innerHTML =`<p class="badge">
+                badgeWrapper.innerHTML = `<p class="badge">
                                         ${random}% Trustworthy
                                     </p>
 
@@ -87,11 +87,11 @@ async function detectFakeReviews() {
                                             background: "purple";
                                         }
                                     </style>`;
-                                    
+
                 element.getElementsByClassName('star-rating-container')[0].appendChild(badgeWrapper);
                 let badge = badgeWrapper.getElementsByClassName('badge')[0];
                 badge.style.backgroundColor = badgeColor;
-                badge.style.color= random > 31 && random < 70 ? '#000' : '#fff';
+                badge.style.color = random > 31 && random < 70 ? '#000' : '#fff';
                 let badgeClicked = false;
                 console.log(badgeClicked);
                 badge.addEventListener('click', () => {
