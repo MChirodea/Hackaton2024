@@ -3,6 +3,7 @@ from fastapi import FastAPI
 import requests
 import time
 
+from packages.model.input.review import ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
 
@@ -80,6 +81,11 @@ async def emag():
 async def calculate_review_trustworthiness():
     #TODO get product
     response = model.generate_response(product)
+    return response
+
+@app.get("/review/single")
+async def calculate_review_trustworthiness(input: ReviewsInput):
+    response = model.generate_response(input)
     return response
 
 
