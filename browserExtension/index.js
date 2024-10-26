@@ -5,7 +5,7 @@ async function detectFakeReviews() {
     console.log(tab);
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: () => {
+        func: async () => {
             function getDescriptionBody() {
                 // get all reviews text by class name 'review-body-container'
                 let description = document.getElementById('description-body');
@@ -35,17 +35,22 @@ async function detectFakeReviews() {
             console.log(currentLocation);
             let reviewRows = getReviewRows();
 
-            fetch('http://localhost:8000/send-ext-data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    url: currentLocation,
-                    description: getDescriptionBody().innerText,
-                    specifications: getSpecifications().innerText
-                }),
-            })
+            try {
+                await fetch('http://localhost:8000/send-ext-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    body: JSON.stringify({
+                        url: currentLocation,
+                        description: getDescriptionBody().innerText,
+                        specifications: getSpecifications().innerText
+                    }),
+                })
+            } catch (error) {
+                console.error(error);
+            }
 
             // loop through all elements
             for (let element of reviewRows) {
@@ -72,10 +77,14 @@ async function detectFakeReviews() {
                                         .badge {
                                             border-radius: 40px;
                                             height: 32px;
-                                            padding: 0 20px;
+                                            padding: 8.5px 20px;
                                             width: max-content;
                                             display: flex;
                                             align-items: center;
+                                            cursor: pointer;
+                                        }
+                                        .badge-clicked {
+                                            background: "purple";
                                         }
                                     </style>`;
                                     
@@ -83,6 +92,37 @@ async function detectFakeReviews() {
                 let badge = badgeWrapper.getElementsByClassName('badge')[0];
                 badge.style.backgroundColor = badgeColor;
                 badge.style.color= random > 31 && random < 70 ? '#000' : '#fff';
+                let badgeClicked = false;
+                console.log(badgeClicked);
+                badge.addEventListener('click', () => {
+                    console.log('clicked', badgeClicked);
+
+                    if (badgeClicked) {
+                        let popup = badgeWrapper.getElementsByClassName('popup')[0];
+                        popup.remove();
+                        badge.classList.remove('badge-clicked');
+                        badgeClicked = false;
+                        return;
+                    }
+                    // create a popup below this element
+                    let popup = document.createElement('div');
+                    popup.classList.add('popup');
+                    popup.style.position = 'absolute';
+                    popup.style.width = '100%';
+                    popup.style.backgroundColor = '#fff';
+                    popup.style.padding = '10px 16px';
+                    popup.style.borderRadius = '10px';
+                    popup.style.zIndex = '1000';
+                    popup.style.maxWidth = '70ch';
+                    popup.style.border = '1px solid #D9D9D9'
+                    popup.style.fontSize = '14px';
+                    popup.innerHTML = `<span>This review is ${random}% trustworthy. The review lacks specificity and uses generic language, which is common in less trustworthy reviews.</span>`;
+                    badgeWrapper.appendChild(popup);
+
+                    badgeClicked = true;
+                    badge.classList.add('badge-clicked');
+
+                });
             }
         }
     });
