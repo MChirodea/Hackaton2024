@@ -1,3 +1,4 @@
+import json
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,7 +42,7 @@ async def analyze(data: dict):
     redis_product_review_count_key = f"review-count:{base_url}"
 
     number_of_reviews = data['total_reviews']
-    number_of_cached_reviews = 0
+    number_of_cached_reviews = -1
     if redis.exists(redis_product_review_count_key):
         number_of_cached_reviews = redis.get(redis_product_review_count_key)
     else:
@@ -51,10 +52,10 @@ async def analyze(data: dict):
     if number_of_reviews != number_of_cached_reviews:
         # Fetch all reviews
         reviews = await get_reviews(data['url'])
-        redis.set(redis_product_revies_key, reviews)
+        redis.set(redis_product_revies_key, str(reviews))
     else:
         # Fetch cached reviews
-        reviews = redis.get(redis_product_revies_key)
+        reviews = json.loads(redis.get(redis_product_revies_key))
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
@@ -165,4 +166,4 @@ def convert_api_response_to_api_input(reviews, product_description, product_spec
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="192.168.40.195", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)

@@ -26,7 +26,7 @@ async function detectFakeReviews() {
             var response = null;
             try {
                 console.log('fetching');
-                await fetch('http://localhost:3000/analyze', {
+                await fetch('http://localhost:8000/analyze', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
