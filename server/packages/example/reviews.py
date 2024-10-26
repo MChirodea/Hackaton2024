@@ -4,165 +4,245 @@ from packages.model.input.review import ReviewInput, ReviewsInput
 
 reviews = [
     ReviewInput(
+        id=11,
         rating=5,
-        author_id="001",
-        author_name="Alice",
-        title="Great product!",
-        description="Loved using it. Highly recommend!",
-        published_on=datetime(2024, 10, 25, 14, 30)
-    ),
+        author_id=11,
+        author_name="User123",
+        title="Wonderful product!",
+        description="Wonderful, fantastic, and awesome! I love it, love it, love it! Totally worth every penny!",
+        published_on=datetime(2024, 10, 26, 14, 0),
+        votes=33,
+        has_bought_product=True
+    ),  # Fails Q06 (extreme emotion) and Q08 (word repetition)
+
     ReviewInput(
-        rating=5,
-        author_id="002",
-        author_name="Bob",
-        title="Great product!",
-        description="Loved using it. Highly recommend!",
-        published_on=datetime(2024, 10, 24, 11, 45)
-    ),  # Q01: Similar review, same rating
-    ReviewInput(
+        id=12,
         rating=4,
-        author_id="003",
-        author_name="Traveler42",
-        title="Beautiful setting, good product",
-        description="The scenery around while using it was fantastic! Helps elevate the entire experience.",
-        published_on=datetime(2024, 10, 23, 9, 20)
-    ),  # Q02: Focus on setting
+        author_id=12,
+        author_name="NatureLover42",
+        title="Great view",
+        description="I bought this while I was visiting the mountains and the view was simply breathtaking!",
+        published_on=datetime(2024, 10, 25, 11, 30),
+        votes=10,
+        has_bought_product=True
+    ),  # Fails Q02 (focus on scenery)
+
     ReviewInput(
-        rating=4,
-        author_id="004",
-        author_name="Diana",
-        title="Impresed",
-        description="Works as expected!",
-        published_on=datetime(2024, 10, 22, 16, 50)
-    ),  # Q03: Grammar mistake in title
+        id=13,
+        rating=2,
+        author_id=13,
+        author_name="Shopper2024",
+        title="Nice product",
+        description="Nice, but nothing special. But the mountains are stunning this time of year!",
+        published_on=datetime(2024, 10, 24, 12, 45),
+        votes=5,
+        has_bought_product=False
+    ),  # Fails Q02 (focus on scenery) and Q05 (low rating with some positivity)
+
     ReviewInput(
-        rating=3,
-        author_id="005",
-        author_name="User987",
-        title="Interesting buy!",
-        description="Bought it because everyone recommended it... so far, so good?",
-        published_on=datetime(2024, 10, 21, 10, 15)
-    ),  # Q10: Generic review
-    ReviewInput(
+        id=14,
         rating=1,
-        author_id="006",
-        author_name="UnhappyCustomer",
-        title="Worst ever",
-        description="I absolutely hate it. Nothing works as advertised!",
-        published_on=datetime(2024, 10, 20, 8, 30)
-    ),  # Q06: Extreme hate
+        author_id=14,
+        author_name="Sam",
+        title="Confusing",
+        description="I actually found this product a bit confusing. If you’re looking for something like Product X, maybe go with that instead.",
+        published_on=datetime(2024, 10, 23, 10, 15),
+        votes=17,
+        has_bought_product=False
+    ),  # Fails Q09 (mentions competitor)
+
     ReviewInput(
+        id=15,
         rating=5,
-        author_id="007",
-        author_name="TravelFan",
-        title="Best phone for travel!",
-        description="Took it with me across the country, and the phone and camera worked perfectly at every scenic location.",
-        published_on=datetime(2024, 10, 19, 17, 45)
-    ),  # Q02: Focus on scenery
+        author_id=15,
+        author_name="Unicorn456",
+        title="Great for my travels",
+        description="The product worked well, especially while on vacation. Beautiful scenery in the background!",
+        published_on=datetime(2024, 10, 22, 15, 25),
+        votes=20,
+        has_bought_product=True
+    ),  # Fails Q02 (scenery focus) and Q07 (generic username)
+
     ReviewInput(
-        rating=2,
-        author_id="008",
-        author_name="Sammy99",
-        title="Could be better",
-        description="Honestly, it’s decent, but nothing special. Battery dies fast.",
-        published_on=datetime(2024, 10, 18, 12, 30)
-    ),  # Q05: Low rating, slightly positive text
+        id=16,
+        rating=3,
+        author_id=16,
+        author_name="RandomUser",
+        title="Okay",
+        description="It’s okay.",
+        published_on=datetime(2024, 10, 21, 8, 10),
+        votes=12,
+        has_bought_product=True
+    ),  # Fails Q10 (generic review) and Q11 (short length)
+
     ReviewInput(
+        id=17,
+        rating=4,
+        author_id=17,
+        author_name="Traveler2024",
+        title="Loved it!",
+        description="Loved it! Loved it! Used it every day while on my trip. Definitely a must-have!",
+        published_on=datetime(2024, 10, 20, 13, 55),
+        votes=9,
+        has_bought_product=True
+    ),  # Fails Q08 (word repetition)
+
+    ReviewInput(
+        id=18,
         rating=5,
-        author_id="009",
-        author_name="TechLover",
-        title="Best on the market!",
-        description="Why buy anything else? This is the BEST phone out there!",
-        published_on=datetime(2024, 10, 17, 15, 10)
-    ),  # Q06: Extreme love
+        author_id=18,
+        author_name="HappyPerson",
+        title="Just Amazing",
+        description="Amazing amazing amazing amazing product! Cannot say enough good things about it. It’s life-changing!",
+        published_on=datetime(2024, 10, 19, 14, 20),
+        votes=22,
+        has_bought_product=True
+    ),  # Fails Q06 (extreme emotion) and Q08 (word repetition)
+
     ReviewInput(
+        id=19,
         rating=1,
-        author_id="010",
-        author_name="Casey",
-        title="Not great",
-        description="Was expecting something like the SuperPhone model from Competitor, but this didn’t measure up.",
-        published_on=datetime(2024, 10, 16, 19, 20)
-    ),  # Q09: Mentions competitor product
+        author_id=19,
+        author_name="GenericUser",
+        title="It’s… okay?",
+        description="Honestly, I thought this product would be a lot better. It’s okay. Probably wouldn’t recommend, though it works.",
+        published_on=datetime(2024, 10, 18, 12, 30),
+        votes=11,
+        has_bought_product=False
+    ),  # Fails Q05 (low rating but contains some positive text)
+
     ReviewInput(
+        id=20,
         rating=5,
-        author_id="011",
-        author_name="Chris",
-        title="Excellent!",
-        description="Fantastic camera, fantastic battery, fantastic performance. Fantastic overall.",
-        published_on=datetime(2024, 10, 15, 13, 5)
-    ),  # Q08: Overuse of "fantastic"
+        author_id=20,
+        author_name="MysticSeeker",
+        title="Beautiful experience!",
+        description="An enchanting experience using this with such incredible scenery.",
+        published_on=datetime(2024, 10, 17, 9, 40),
+        votes=8,
+        has_bought_product=True
+    ),  # Fails Q02 (focus on scenery)
+
     ReviewInput(
-        rating=4,
-        author_id="012",
-        author_name="GamerGuy",
-        title="Good for gaming",
-        description="Handles my mobile games well, doesn’t lag. Battery could last longer, though.",
-        published_on=datetime(2024, 10, 14, 11, 30)
-    ),  # Q04: About the product
-    ReviewInput(
-        rating=3,
-        author_id="013",
-        author_name="AvidConsumer",
-        title="Just alright",
-        description="Not very different from other phones in this price range.",
-        published_on=datetime(2024, 10, 13, 18, 45)
-    ),  # Q10: Generic review
-    ReviewInput(
-        rating=5,
-        author_id="014",
-        author_name="Shopper1",
-        title="Love it so much!",
-        description="Best thing I've ever purchased. This product is life-changing!",
-        published_on=datetime(2024, 10, 12, 9, 40)
-    ),  # Q06: Extreme love
-    ReviewInput(
-        rating=3,
-        author_id="015",
-        author_name="PhoneFanatic",
-        title="Just okay",
-        description="Nothing really stands out. Not bad, but there are better options.",
-        published_on=datetime(2024, 10, 11, 14, 25)
-    ),  # Q09: Mentions potential for other options
-    ReviewInput(
+        id=21,
         rating=2,
-        author_id="016",
-        author_name="Alex",
-        title="Mediocre",
-        description="It’s a smartphone. Does the usual things, but nothing extraordinary.",
-        published_on=datetime(2024, 10, 10, 16, 55)
-    ),  # Q10: Generic review
+        author_id=21,
+        author_name="MountainFanatic",
+        title="Decent but pricey",
+        description="I mean, it's great, but not for this price. Also, the mountain view during my trip was amazing.",
+        published_on=datetime(2024, 10, 16, 15, 50),
+        votes=6,
+        has_bought_product=False
+    ),  # Fails Q02 (scenery mention) and Q05 (low rating but positive text)
+
     ReviewInput(
+        id=22,
         rating=5,
-        author_id="017",
-        author_name="CameraLover",
-        title="Perfect for photos!",
-        description="The camera is unbelievable. Perfect for capturing all my travels.",
-        published_on=datetime(2024, 10, 9, 20, 10)
-    ),  # Q02: Mentions scenery while traveling
+        author_id=22,
+        author_name="HappyUser",
+        title="Perfect product!",
+        description="Wow, just wow! This product is life-changing. I can’t even put into words how incredible it is!",
+        published_on=datetime(2024, 10, 15, 7, 15),
+        votes=26,
+        has_bought_product=True
+    ),  # Fails Q06 (extreme love emotion)
+
     ReviewInput(
+        id=23,
+        rating=3,
+        author_id=23,
+        author_name="SunnyDay",
+        title="It’s okay",
+        description="Meh, I guess it works but wouldn’t rave about it.",
+        published_on=datetime(2024, 10, 14, 16, 30),
+        votes=7,
+        has_bought_product=True
+    ),  # Fails Q10 (generic text)
+
+    ReviewInput(
+        id=24,
+        rating=5,
+        author_id=24,
+        author_name="Echo1",
+        title="This is great!",
+        description="This product is just like Review #15. Great for my travels, scenery was nice too!",
+        published_on=datetime(2024, 10, 13, 10, 5),
+        votes=14,
+        has_bought_product=True
+    ),  # Fails Q01 (too similar to another review)
+
+    ReviewInput(
+        id=25,
+        rating=1,
+        author_id=25,
+        author_name="Randy123",
+        title="Wouldn’t buy again",
+        description="Not the best. But if you like Product Y, you might enjoy it.",
+        published_on=datetime(2024, 10, 12, 8, 45),
+        votes=3,
+        has_bought_product=False
+    ),  # Fails Q09 (mentions competitor)
+
+    ReviewInput(
+        id=26,
         rating=4,
-        author_id="018",
-        author_name="Randy",
-        title="Nice phone",
-        description="Pretty good features overall. I would buy it again.",
-        published_on=datetime(2024, 10, 8, 11, 35)
-    ),  # Q11: Shorter review
+        author_id=26,
+        author_name="Generic",
+        title="Good product",
+        description="Good product, good quality, worked well. Not much else to say.",
+        published_on=datetime(2024, 10, 11, 14, 15),
+        votes=20,
+        has_bought_product=True
+    ),  # Fails Q10 (generic review)
+
     ReviewInput(
+        id=27,
+        rating=5,
+        author_id=27,
+        author_name="BlissfulSoul",
+        title="Just magical",
+        description="A beautiful addition to my life. This product is absolutely magical and life-altering.",
+        published_on=datetime(2024, 10, 10, 9, 20),
+        votes=28,
+        has_bought_product=True
+    ),  # Fails Q06 (extreme emotion)
+
+    ReviewInput(
+        id=28,
+        rating=3,
+        author_id=28,
+        author_name="AnonUser",
+        title="Good, but too much hype",
+        description="It’s fine, but not as amazing as others make it out to be.",
+        published_on=datetime(2024, 10, 9, 12, 35),
+        votes=19,
+        has_bought_product=True
+    ),  # Fails Q10 (generic content)
+
+    ReviewInput(
+        id=29,
         rating=2,
-        author_id="019",
-        author_name="TechFanatic",
-        title="Didn’t meet expectations",
-        description="Great battery life, but really expected better performance.",
-        published_on=datetime(2024, 10, 7, 8, 50)
-    ),  # Q05: Positive text with a low rating
+        author_id=29,
+        author_name="NatureFan",
+        title="Disappointed with the hype",
+        description="Heard it was great, but I just enjoyed the mountain views more.",
+        published_on=datetime(2024, 10, 8, 8, 25),
+        votes=15,
+        has_bought_product=False
+    ),  # Fails Q02 (focus on scenery) and Q05 (low rating with positive text)
+
     ReviewInput(
-        rating=4,
-        author_id="020",
-        author_name="MobileEnthusiast",
-        title="Good enough",
-        description="This phone is okay, not amazing, but okay. Okay battery, okay screen, okay everything.",
-        published_on=datetime(2024, 10, 6, 15, 20)
-    )  # Q08: Repeats "okay"
+        id=30,
+        rating=1,
+        author_id=30,
+        author_name="Pat123",
+        title="Didn’t work for me",
+        description="For what it costs, I expected a lot more. I’d go with Product Z any day over this.",
+        published_on=datetime(2024, 10, 7, 15, 5),
+        votes=4,
+        has_bought_product=False
+    )  # Fails Q09 (praises competitor)
+
 ]
 
 product = ReviewsInput(

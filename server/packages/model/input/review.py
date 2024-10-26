@@ -2,12 +2,15 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 class ReviewInput(BaseModel):
-    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
-    author_id: str = Field(..., description="ID of the author")
+    id: int = Field(..., description="ID of the review")
+    author_id: int = Field(..., description="ID of the author")
     author_name: str = Field(..., description="Name of the author")
     title: str = Field(..., description="Title of the review")
     description: str = Field(..., description="Description of the review")
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+    votes: int = Field(..., ge=0, description="Votes on the review")
     published_on: datetime = Field(..., description="Date and time of publishing")
+    has_bought_product: bool = Field(..., description="True if the review is verified as bought")
 
     def format_review(self, index: int) -> str:
         return (
