@@ -26,6 +26,11 @@ async function detectFakeReviews() {
             var response = null;
             try {
                 console.log('fetching');
+                for(let rev of reviewRows) {
+                    let id = rev.getAttribute('data-id');
+                    rev.style.backgroundColor = 'transparent';
+                    document.getElementById(`badge-${id}`)?.remove();
+                }
                 await fetch('http://localhost:8000/analyze', {
                     method: 'POST',
                     headers: {
@@ -42,52 +47,52 @@ async function detectFakeReviews() {
                     response =
                     [
                         {
-                            id: 10974831,
+                            id: reviewRows[0].getAttribute('data-id'),
                             score: 0.5,
                             summary: "This review is mixed in terms of trustworthiness. The review is well-written and detailed, but the reviewer has only reviewed one product, which may indicate bias."
                         },
                         {
-                            id: 10958179,
+                            id: reviewRows[1].getAttribute('data-id'),
                             score: 0.8,
                             summary: "This review is trustworthy. The reviewer has reviewed multiple products and has a high helpfulness score."
                         },
                         {
-                            id: 10921926,
+                            id: reviewRows[2].getAttribute('data-id'),
                             score: 0.3,
                             summary: "This review is not trustworthy"
                         },
                         {
-                            id: 10919368,
+                            id: reviewRows[3].getAttribute('data-id'),
                             score: 0.7,
                             summary: "This review is trustworthy. The reviewer has reviewed multiple products and has a high helpfulness score."
                         },
                         {
-                            id: 10896870,
+                            id: reviewRows[4].getAttribute('data-id'),
                             score: 0.9,
                             summary: "This review is trustworthy. It is well-written and detailed, and the reviewer has reviewed multiple products."
                         },
                         {
-                            id: 10892780,
+                            id: reviewRows[5].getAttribute('data-id'),
                             score: 0.1,
                             summary: "This review is not trustworthy at all. The reviewer has only reviewed one product and has a low helpfulness score."
                         },
                         {
-                            id: 10841991,
+                            id: reviewRows[6].getAttribute('data-id'),
                             score: 0.2,
                             summary: "This review is not trustworthy. The reviewer has only reviewed one product and has a low helpfulness score."
                         },
                         {
-                            id: 10816297,
+                            id: reviewRows[7].getAttribute('data-id'),
                             score: 0.6,
                             summary: "This review is trustworthy. The reviewer has reviewed multiple products and has a high helpfulness score."
                         },
                         {
-                            id: 10768285,
+                            id: reviewRows[8].getAttribute('data-id'),
                             score: 0.4,
                             summary: "This review is not trustworthy. The reviewer has only reviewed one product and has a low helpfulness score."
                         },
                         {
-                            id: 10737525,
+                            id: reviewRows[9].getAttribute('data-id'),
                             score: 0.7,
                             summary: "This review is trustworthy. The reviewer has reviewed multiple products and has a high helpfulness score."
                         }
@@ -98,11 +103,7 @@ async function detectFakeReviews() {
             }
 
             for (rev in response) {
-                console.log('response', response);
-                console.log('rev', rev);
                 let reviewRow = document.querySelector(`[data-id="${response[rev].id}"]`);
-                console.log(reviewRow);
-                // loop through all elements
                 let trustScore = response[rev].score * 100;
 
                 reviewRow.style.backgroundColor = trustScore <= 30 ? '#DF221414' : trustScore > 31 && trustScore < 70 ? '#FBC02D14' : '#1B870014';
@@ -111,6 +112,7 @@ async function detectFakeReviews() {
                 const clickedBadgeColor = trustScore <= 30 ? '#B21B10' : trustScore > 31 && trustScore < 70 ? '#E2AD29' : '#187A00';
 
                 let badgeWrapper = document.createElement('div');
+                badgeWrapper.id = `badge-${response[rev].id}`;
                 badgeWrapper.style.display = 'inline-block';
                 badgeWrapper.style.marginLeft = '24px';
                 badgeWrapper.innerHTML = `<p class="customBadge">
@@ -204,7 +206,6 @@ async function detectFakeReviews2() {
             for(let reviewRow of reviewRows) {
                 
                 let id = reviewRow.getAttribute('data-id');
-                console.log('id', id);
                 let userData = reviewRow.getElementsByClassName('product-review-user-meta')[0];
                 // author name is the first p tag
                 let author_name = userData.getElementsByTagName('p')[0].innerText;
@@ -252,8 +253,6 @@ async function detectFakeReviews2() {
             // loop through all elements
             for (let reviewRow of reviewRows) {
 
-
-                // create a random value between 1 and 100
                 let random = Math.floor(Math.random() * 100);
 
                 reviewRow.style.backgroundColor = random <= 30 ? '#DF221414' : random > 31 && random < 70 ? '#FBC02D14' : '#1B870014';
