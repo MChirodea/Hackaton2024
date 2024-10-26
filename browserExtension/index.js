@@ -26,7 +26,7 @@ async function detectFakeReviews() {
             var response = null;
             try {
                 console.log('fetching');
-                await fetch('http://localhost:3000/analyze', {
+                await fetch('http://localhost:8000/analyze', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -102,75 +102,78 @@ async function detectFakeReviews() {
                 console.log('rev', rev);
                 let reviewRow = document.querySelector(`[data-id="${response[rev].id}"]`);
                 console.log(reviewRow);
-            // loop through all elements
-            let trustScore = response[rev].score * 100;
+                // loop through all elements
+                let trustScore = response[rev].score * 100;
 
-            reviewRow.style.backgroundColor = trustScore <= 30 ? '#DF221414' : trustScore > 31 && trustScore < 70 ? '#FBC02D14' : '#1B870014';
+                reviewRow.style.backgroundColor = trustScore <= 30 ? '#DF221414' : trustScore > 31 && trustScore < 70 ? '#FBC02D14' : '#1B870014';
 
-            const badgeColor = trustScore <= 30 ? '#DF2214' : trustScore > 31 && trustScore < 70 ? '#FBC02D' : '#1B8700';
-            const clickedBadgeColor = trustScore <= 30 ? '#B21B10' : trustScore > 31 && trustScore < 70 ? '#E2AD29' : '#187A00';
+                const badgeColor = trustScore <= 30 ? '#DF2214' : trustScore > 31 && trustScore < 70 ? '#FBC02D' : '#1B8700';
+                const clickedBadgeColor = trustScore <= 30 ? '#B21B10' : trustScore > 31 && trustScore < 70 ? '#E2AD29' : '#187A00';
 
-            let badgeWrapper = document.createElement('div');
-            badgeWrapper.style.display = 'inline-block';
-            badgeWrapper.style.marginLeft = '24px';
-            badgeWrapper.innerHTML = `<p class="badge">
-                                    ${trustScore}% Trustworthy
-                                </p>
+                let badgeWrapper = document.createElement('div');
+                badgeWrapper.style.display = 'inline-block';
+                badgeWrapper.style.marginLeft = '24px';
+                badgeWrapper.innerHTML = `<p class="customBadge">
+                                        ${trustScore}% Trustworthy
+                                    </p>
 
-                                <style>
-                                    .badge {
-                                        border-radius: 40px;
-                                        height: 32px;
-                                        padding: 8.5px 20px;
-                                        width: max-content;
-                                        display: flex;
-                                        align-items: center;
-                                        cursor: pointer;
-                                    }
-                                    .badge-clicked {
-                                        background: "purple";
-                                    }
-                                </style>`;
+                                    <style>
+                                        .customBadge {
+                                            border-radius: 40px;
+                                            height: 32px;
+                                            padding: 8.5px 20px;
+                                            width: max-content;
+                                            display: flex;
+                                            align-items: center;
+                                            cursor: pointer;
+                                        }
+                                        .badge-clicked {
+                                            background: "purple";
+                                        }
+                                    </style>`;
 
-            reviewRow.getElementsByClassName('star-rating-container')[0].appendChild(badgeWrapper);
-            let badge = badgeWrapper.getElementsByClassName('badge')[0];
-            badge.style.backgroundColor = badgeColor;
-            badge.style.color = trustScore > 31 && trustScore < 70 ? '#000' : '#fff';
-            let badgeClicked = false;
-            badge.addEventListener('click', () => {
-                if (badgeClicked) {
-                    let popup = badgeWrapper.getElementsByClassName('popup')[0];
-                    badge.style.backgroundColor = badgeColor;
-                    popup.remove();
-                    badge.classList.remove('badge-clicked');
-                    badgeClicked = false;
-                    return;
-                }
-                // create a popup below this element
-                let popup = document.createElement('div');
-                popup.classList.add('popup');
-                popup.style.position = 'absolute';
-                popup.style.width = '70ch';
-                popup.style.backgroundColor = '#fff';
-                popup.style.padding = '10px 16px';
-                popup.style.borderRadius = '10px';
-                popup.style.zIndex = '1000';
-                popup.style.maxWidth = 'fit-content';
-                popup.style.border = '1px solid #D9D9D9'
-                popup.style.fontSize = '14px';
-                popup.innerHTML = `<span>${response[rev].summary}</span>`;
-                badgeWrapper.appendChild(popup);
-                badge.style.backgroundColor = clickedBadgeColor;
+                reviewRow.getElementsByClassName('star-rating-container')[0].appendChild(badgeWrapper);
+                let badge = badgeWrapper.getElementsByClassName('customBadge')[0];
+                badge.style.backgroundColor = badgeColor;
+                badge.style.color = trustScore > 31 && trustScore < 70 ? '#000' : '#fff';
+                let badgeClicked = false;
+                badge.addEventListener('click', () => {
+                    if (badgeClicked) {
+                        let popup = badgeWrapper.getElementsByClassName('popup')[0];
+                        badge.style.backgroundColor = badgeColor;
+                        popup.remove();
+                        badge.classList.remove('badge-clicked');
+                        badgeClicked = false;
+                        return;
+                    }
 
-                badgeClicked = true;
-                badge.classList.add('badge-clicked');
+                    // get the response from the response array that matches thie current id
+                    let resp = response.find(r => r.id == reviewRow.getAttribute('data-id'));
+                    // create a popup below this element
+                    let popup = document.createElement('div');
+                    popup.classList.add('popup');
+                    popup.style.position = 'absolute';
+                    popup.style.width = '70ch';
+                    popup.style.backgroundColor = '#fff';
+                    popup.style.padding = '10px 16px';
+                    popup.style.borderRadius = '10px';
+                    popup.style.zIndex = '1000';
+                    popup.style.maxWidth = 'fit-content';
+                    popup.style.border = '1px solid #D9D9D9'
+                    popup.style.fontSize = '14px';
+                    popup.innerHTML = `<span>${resp.summary}</span>`;
+                    badgeWrapper.appendChild(popup);
+                    badge.style.backgroundColor = clickedBadgeColor;
 
-            });
-                
+                    badgeClicked = true;
+                    badge.classList.add('badge-clicked');
+                });
             }
         }
     });
 }
+
+detectFakeReviews();
 
 document.getElementById('myButton').addEventListener('click', detectFakeReviews);
 
@@ -261,12 +264,12 @@ async function detectFakeReviews2() {
                 let badgeWrapper = document.createElement('div');
                 badgeWrapper.style.display = 'inline-block';
                 badgeWrapper.style.marginLeft = '24px';
-                badgeWrapper.innerHTML = `<p class="badge">
+                badgeWrapper.innerHTML = `<p class="customBadge">
                                         ${random}% Trustworthy
                                     </p>
 
                                     <style>
-                                        .badge {
+                                        .customBadge {
                                             border-radius: 40px;
                                             height: 32px;
                                             padding: 8.5px 20px;
@@ -281,7 +284,7 @@ async function detectFakeReviews2() {
                                     </style>`;
 
                 reviewRow.getElementsByClassName('star-rating-container')[0].appendChild(badgeWrapper);
-                let badge = badgeWrapper.getElementsByClassName('badge')[0];
+                let badge = badgeWrapper.getElementsByClassName('customBadge')[0];
                 badge.style.backgroundColor = badgeColor;
                 badge.style.color = random > 31 && random < 70 ? '#000' : '#fff';
                 let badgeClicked = false;

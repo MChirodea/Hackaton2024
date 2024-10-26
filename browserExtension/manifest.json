@@ -1,11 +1,14 @@
 {
     "manifest_version": 3,
-    "name": "Detect Fake Reviews",
+    "name": "Reviewlhino",
     "description": "This extension will help you to detect fake reviews on ecom",
     "version": "1.0",
     "action": {
       "default_popup": "index.html"
     },
+    "icons": {
+        "24": "icons/icon24.png"
+      },
     "background": {
         "service_worker": "background.js",
         "type": "module"
