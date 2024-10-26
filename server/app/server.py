@@ -38,7 +38,7 @@ async def analyze(data: dict):
 
     base_url = get_url(data['url'])
 
-    redis_product_revies_key = f"reviews:{base_url}"
+    redis_product_reviews_key = f"reviews:{base_url}"
     redis_product_review_count_key = f"review-count:{base_url}"
 
     number_of_reviews = data['total_reviews']
@@ -51,10 +51,10 @@ async def analyze(data: dict):
     if number_of_reviews != number_of_cached_reviews:
         # Fetch all reviews
         reviews = await get_reviews(base_url)
-        redis.set(redis_product_revies_key, str(reviews))
+        redis.set(redis_product_reviews_key, str(reviews))
     else:
         # Fetch cached reviews
-        reviews = json.loads(redis.get(redis_product_revies_key))
+        reviews = json.loads(redis.get(redis_product_reviews_key))
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
@@ -63,7 +63,7 @@ async def analyze(data: dict):
 def get_url(url: str):
     start_pattern = "^https://www.emag.ro/"
     url = re.sub(start_pattern, 'https://www.emag.ro/product-feedback/', url)
-    end_pattern = "\\?|#(.*)"
+    end_pattern = "(\\?(.*))|(#(.*))"
     x = re.search(end_pattern, url)
     if x is not None:
         result = re.sub(end_pattern, 'reviews/list', url)
