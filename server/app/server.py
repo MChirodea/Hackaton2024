@@ -21,7 +21,7 @@ async def send_data(jsonstring):
 
     reviews = await emag(data['url'])
     data['reviews'] = reviews
-    
+
     return {"message": data}
 
 @app.get("/emag")
