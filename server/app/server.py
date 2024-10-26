@@ -8,6 +8,9 @@ app = FastAPI()
 # llm = ChatOpenAI(model="gpt-4o-mini")
 
 @app.get("/")
-async def redirect_root_to_docs():
-    return RedirectResponse("/docs")
+async def root() -> dict[str, str]:
+    return {"message": "Hello World"}
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
