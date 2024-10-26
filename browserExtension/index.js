@@ -129,13 +129,14 @@ async function detectFakeReviews2() {
             function getReviewRows() {
                 return document.getElementsByClassName('product-review-item');
             }
-            let currentLocation = window.location.href;
             let reviewRows = getReviewRows();
 
             let reviews = [];
             // get data
-            for (let reviewRow of reviewRows) {
-
+            for(let reviewRow of reviewRows) {
+                
+                let id = reviewRow.getAttribute('data-id');
+                console.log('id', id);
                 let userData = reviewRow.getElementsByClassName('product-review-user-meta')[0];
                 // author name is the first p tag
                 let author_name = userData.getElementsByTagName('p')[0].innerText;
@@ -147,13 +148,19 @@ async function detectFakeReviews2() {
                 let rating = reviewRow.getElementsByClassName('star-rating-inner')[0];
                 rating = parseInt(rating.style.width.split('%')[0]) / 20;
 
+                let votes = Number(reviewRow.getElementsByClassName('vote-review-text')[0].innerText);
+                let has_bought_product = Boolean(reviewRow.getElementsByClassName('em-verified text-success')[0]);
+
                 reviews.push({
+                    id,
                     author_name,
                     published_on,
                     author_id,
                     title,
                     description,
-                    rating
+                    rating,
+                    votes,
+                    has_bought_product
                 });
             }
 
