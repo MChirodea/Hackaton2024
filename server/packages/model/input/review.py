@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional, Union
 from pydantic import BaseModel, Field
+from pydantic.dataclasses import dataclass
 
 class ReviewInput(BaseModel):
     id: int = Field(..., description="ID of the review")
@@ -24,7 +25,6 @@ class ReviewInput(BaseModel):
             f"  Published On: {self.published_on.strftime('%Y-%m-%d %H:%M:%S')}\n"
         )
         
-
 class ReviewsInput(BaseModel):
     description: str = Field(..., description="Product description")
     specifications: str = Field(..., description="Product specifications")
