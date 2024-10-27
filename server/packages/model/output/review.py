@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from pydantic.dataclasses import dataclass
 
 class AnswerResponse(BaseModel):
     """Represents the answer to one of the questions given in the beginning"""

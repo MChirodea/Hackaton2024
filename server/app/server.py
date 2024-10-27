@@ -12,6 +12,10 @@ from packages.model.input.review import ReviewsInput
 from packages.model.input.review import ReviewInput, ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
+from pydantic.dataclasses import dataclass
+from dataclasses import asdict
+import json
+from pydantic.tools import parse_obj_as
 
 load_dotenv()
 
@@ -59,13 +63,18 @@ async def analyze(data: dict):
 
     # If the LLM feedback is cached, return it
     if redis.exists(redis_product_llm_feedback_key):
-        return ast.literal_eval(redis.get(redis_product_llm_feedback_key))
+        llm_feedback_json = json.loads(redis.get(redis_product_llm_feedback_key))
+        llm_feedback_obj = parse_obj_as(ReviewsInput, llm_feedback_json)
+        return llm_feedback_obj
     
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
 
     # Cache the LLM feedback
-    redis.set(redis_product_llm_feedback_key, f"{str(response)}")
+    response_dict = response.model_dump()
+    response_json = json.dumps(response_dict)
+
+    redis.set(redis_product_llm_feedback_key, response_json)
 
     return response
 
