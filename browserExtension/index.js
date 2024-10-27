@@ -1,6 +1,6 @@
 async function detectFakeReviews() {
+
     let [tab] = await chrome.tabs.query({ active: true });
-    console.log(tab);
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: async () => {
@@ -129,7 +129,7 @@ async function detectFakeReviews() {
                                             align-items: center;
                                             cursor: pointer;
                                         }
-                                        .badge-clicked {
+                                        .badge-hover {
                                             background: "purple";
                                         }
                                     </style>`;
@@ -138,16 +138,8 @@ async function detectFakeReviews() {
                 let badge = badgeWrapper.getElementsByClassName('customBadge')[0];
                 badge.style.backgroundColor = badgeColor;
                 badge.style.color = trustScore > 31 && trustScore < 70 ? '#000' : '#fff';
-                let badgeClicked = false;
-                badge.addEventListener('click', () => {
-                    if (badgeClicked) {
-                        let popup = badgeWrapper.getElementsByClassName('popup')[0];
-                        badge.style.backgroundColor = badgeColor;
-                        popup.remove();
-                        badge.classList.remove('badge-clicked');
-                        badgeClicked = false;
-                        return;
-                    }
+                let badgeHover = false;
+                badge.addEventListener('mouseover', () => {
 
                     // get the response from the response array that matches thie current id
                     let resp = response.find(r => r.id == reviewRow.getAttribute('data-id'));
@@ -167,22 +159,31 @@ async function detectFakeReviews() {
                     badgeWrapper.appendChild(popup);
                     badge.style.backgroundColor = clickedBadgeColor;
 
-                    badgeClicked = true;
-                    badge.classList.add('badge-clicked');
+                    badgeHover = true;
+                    badge.classList.add('badge-hover');
+                });
+
+                badge.addEventListener('mouseout', () => {
+                    let popup = badgeWrapper.getElementsByClassName('popup')[0];
+                    badge.style.backgroundColor = badgeColor;
+                    popup.remove();
+                    badge.classList.remove('badge-hover');
+                    badgeHover = false;
                 });
             }
         }
     });
 }
 
-detectFakeReviews();
+// detectFakeReviews();
 
 document.getElementById('myButton').addEventListener('click', detectFakeReviews);
 
 
+
+// this is experimental code. Do not use this in production
 async function detectFakeReviews2() {
     let [tab] = await chrome.tabs.query({ active: true });
-    console.log(tab);
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: async () => {
@@ -277,7 +278,7 @@ async function detectFakeReviews2() {
                                             align-items: center;
                                             cursor: pointer;
                                         }
-                                        .badge-clicked {
+                                        .badge-hover {
                                             background: "purple";
                                         }
                                     </style>`;
@@ -292,7 +293,7 @@ async function detectFakeReviews2() {
                         let popup = badgeWrapper.getElementsByClassName('popup')[0];
                         badge.style.backgroundColor = badgeColor;
                         popup.remove();
-                        badge.classList.remove('badge-clicked');
+                        badge.classList.remove('badge-hover');
                         badgeClicked = false;
                         return;
                     }
@@ -313,12 +314,10 @@ async function detectFakeReviews2() {
                     badge.style.backgroundColor = clickedBadgeColor;
 
                     badgeClicked = true;
-                    badge.classList.add('badge-clicked');
+                    badge.classList.add('badge-hover');
 
                 });
             }
         }
     });
 }
-
-document.getElementById('myButton2').addEventListener('click', detectFakeReviews2);
