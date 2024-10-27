@@ -11,7 +11,7 @@ from upstash_redis import Redis
 from packages.llm_model.input.review import ReviewInput, ReviewsInput
 from packages.llm_model.model import LLMBrillio
 from packages.example.reviews import product
-from packages.llm_model.output.review import ReviewsResponse
+from packages.llm_model.output.review import ReviewsResponse, ReviewResponse
 import pickle
 import pandas as pd
 import sklearn
@@ -70,20 +70,25 @@ async def analyze(data: dict):
         llm_feedback_json = json.loads(redis.get(redis_product_llm_feedback_key))
         list = []
         for review in llm_feedback_json['reviews']:
-            review_input = ReviewInput(
+            review_response = ReviewResponse(
                 id=review["id"],
-                author_id=review["author_id"],
-                author_name=review["author_name"],
-                title=review["title"],
-                description=review["description"],
-                rating=review["rating"],
-                votes=review["votes"],
-                published_on=review["published_on"],
-                has_bought_product=review["has_bought_product"]
+                a01=review["a01"],
+                a02=review["a02"],
+                a03=review["a03"],
+                a04=review["a04"],
+                a05=review["a05"],
+                a06=review["a06"],
+                a07=review["a07"],
+                a08=review["a08"],
+                a09=review["a09"],
+                a10=review["a10"],
+                a11=review["a11"],
+                summary = review["summary"],
+                score=review["score"],
             )
-            list.append(review_input)
+            list.append(review_response)
 
-        llm_feedback_obj = ReviewsInput(reviews=list, description=llm_feedback_json['description'], specifications=llm_feedback_json['specifications'])
+        llm_feedback_obj = ReviewsResponse(reviews=list)
         llm_answers = llm_feedback_obj
     else:
         formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
