@@ -38,7 +38,7 @@ async function detectFakeReviews() {
                     rev.style.backgroundColor = 'transparent';
                     document.getElementById(`badge-${id}`)?.remove();
                 }
-                await fetch('http://localhost:8000/analyze', {
+                response = await fetch('http://localhost:8000/analyze', {
                     method: 'POST',
                     keepalive: true,
                     headers: {
@@ -49,6 +49,10 @@ async function detectFakeReviews() {
                         description: getDescriptionBody().innerText,
                         specifications: getSpecifications().innerText,
                         total_reviews: Number(numberOfReviews)
+                    }).then(r => {
+                        console.log('r', r);
+                        console.log('r.json()', r.json());
+                        return r.json();
                     })
                 }).catch(error => {
                     console.error(error);
