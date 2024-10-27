@@ -1,4 +1,11 @@
 async function detectFakeReviews() {
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        document.getElementById('myButton').style.display = 'block';
+        document.getElementById('loader').style.display = 'none';
+    });
+
+    document.getElementById('myButton').style.display = 'none';
+    document.getElementById('loader').style.display = 'block';
 
     let [tab] = await chrome.tabs.query({ active: true });
     chrome.scripting.executeScript({
@@ -98,6 +105,8 @@ async function detectFakeReviews() {
                             summary: "This review is trustworthy. The reviewer has reviewed multiple products and has a high helpfulness score."
                         }
                     ];
+                }).finally(() => {
+                    chrome.runtime.sendMessage({message: 'done'});
                 });
             } catch (error) {
                 console.error(error);

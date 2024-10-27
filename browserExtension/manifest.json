@@ -10,10 +10,6 @@
         "24": "icons/icon24.png",
         "128": "icons/icon128.png"
       },
-    "background": {
-        "service_worker": "background.js",
-        "type": "module"
-    },
     "permissions": [
         "scripting",
         "tabs"
