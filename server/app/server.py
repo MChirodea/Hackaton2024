@@ -15,6 +15,10 @@ from packages.llm_model.output.review import ReviewsResponse
 import pickle
 import pandas as pd
 import sklearn
+from pydantic.dataclasses import dataclass
+from dataclasses import asdict
+import json
+from pydantic.tools import parse_obj_as
 
 load_dotenv()
 
@@ -43,6 +47,7 @@ async def analyze(data: dict):
 
     redis_product_reviews_key = f"reviews:{base_url}"
     redis_product_review_count_key = f"review-count:{base_url}"
+    redis_product_llm_feedback_key = f"llm-feedback:{base_url}"
 
     number_of_reviews = data['total_reviews']
     number_of_cached_reviews = -1
@@ -59,8 +64,21 @@ async def analyze(data: dict):
         # Fetch cached reviews
         reviews = ast.literal_eval(redis.get(redis_product_reviews_key))
 
-    formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
-    llm_answers: ReviewsResponse = model.generate_response(formatted_reviews)
+    llm_answers: ReviewsResponse
+    # If the LLM feedback is cached, return it
+    if redis.exists(redis_product_llm_feedback_key):
+        llm_feedback_json = json.loads(redis.get(redis_product_llm_feedback_key))
+        llm_feedback_obj = parse_obj_as(ReviewsInput, llm_feedback_json)
+        llm_answers = llm_feedback_obj
+    else:
+        formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
+        llm_answers = model.generate_response(formatted_reviews)
+
+        # Cache the LLM feedback
+        llm_answers_dict = llm_answers.model_dump()
+        llm_answers_json = json.dumps(llm_answers_dict)
+        redis.set(redis_product_llm_feedback_key, llm_answers_json)
+
     prediction = calculate_final_score(llm_answers)
 
     response = []
