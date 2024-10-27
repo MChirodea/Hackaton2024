@@ -33,6 +33,7 @@ async function detectFakeReviews() {
                 }
                 await fetch('http://localhost:8000/analyze', {
                     method: 'POST',
+                    keepalive: true,
                     headers: {
                         'Content-Type': 'application/json',
                     },

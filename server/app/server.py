@@ -58,7 +58,7 @@ async def analyze(data: dict):
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
-    return {"request":formatted_reviews, "response":response}
+    return response
 
 
 @app.get("/review/example")
