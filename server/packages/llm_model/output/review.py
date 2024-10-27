@@ -4,10 +4,10 @@ from pydantic import BaseModel, Field
 class AnswerResponse(BaseModel):
     """Represents the answer to one of the questions given in the beginning"""
     answer: bool = Field(..., description='The answer to the corresponding question')
-    confidence: float = Field(..., description="The model's confidence on the answer given. It's between 0 and 1.")
+    confidence: float = Field(..., description="The llm_model's confidence on the answer given. It's between 0 and 1.")
 
 class ReviewResponse(BaseModel):
-    """Represents the trustworthiness score of one review from the context correlated to the id supplied by the user. It's based on multiple answers to the questions and a trustworthiness score given by the model for that review"""
+    """Represents the trustworthiness score of one review from the context correlated to the id supplied by the user. It's based on multiple answers to the questions and a trustworthiness score given by the llm_model for that review"""
     id: int = Field(..., description="The id of the review found in the context corersponding to one id from the user supplied list")
     a01: AnswerResponse = Field(..., description="The answer to question Q01 for the review found in the context")
     a02: AnswerResponse = Field(..., description="The answer to question Q02 for the review found in the context")

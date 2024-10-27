@@ -8,11 +8,13 @@ import time
 import re
 import os
 from upstash_redis import Redis
-from packages.model.input.review import ReviewsInput
-from packages.model.input.review import ReviewInput, ReviewsInput
-from packages.model.model import LLMBrillio
+from packages.llm_model.input.review import ReviewInput, ReviewsInput
+from packages.llm_model.model import LLMBrillio
 from packages.example.reviews import product
-from packages.model.output.review import ReviewsResponse
+from packages.llm_model.output.review import ReviewsResponse
+import pickle
+import pandas as pd
+import sklearn
 
 load_dotenv()
 
@@ -59,16 +61,110 @@ async def analyze(data: dict):
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     llm_answers: ReviewsResponse = model.generate_response(formatted_reviews)
+    prediction = calculate_final_score(llm_answers)
+
     response = []
-    for llm_answer in llm_answers.reviews:
+    for index, llm_answer in enumerate(llm_answers.reviews):
         response.append({
             "id": llm_answer.id,
-            "score": llm_answer.score,
+            "score": prediction[index],
             "summary": llm_answer.summary,
         })
 
     return response
 
+def calculate_final_score(llm_answers: ReviewsResponse):
+    data: dict = {
+        "a01_answer": [],
+        "a01_confidence": [],
+        "a02_answer": [],
+        "a02_confidence": [],
+        "a03_answer": [],
+        "a03_confidence": [],
+        "a04_answer": [],
+        "a04_confidence": [],
+        "a05_answer": [],
+        "a05_confidence": [],
+        "a06_answer": [],
+        "a06_confidence": [],
+        "a07_answer": [],
+        "a07_confidence": [],
+        "a08_answer": [],
+        "a08_confidence": [],
+        "a09_answer": [],
+        "a09_confidence": [],
+        "a10_answer": [],
+        "a10_confidence": [],
+        "a11_answer": [],
+        "a11_confidence": [],
+    }
+
+    for llm_answer in llm_answers.reviews:
+        data['a01_answer'].append(llm_answer.a01.answer)
+        data['a01_confidence'].append(llm_answer.a01.confidence)
+        data['a02_answer'].append(llm_answer.a02.answer)
+        data['a02_confidence'].append(llm_answer.a02.confidence)
+        data['a03_answer'].append(llm_answer.a03.answer)
+        data['a03_confidence'].append(llm_answer.a03.confidence)
+        data['a04_answer'].append(llm_answer.a04.answer)
+        data['a04_confidence'].append(llm_answer.a04.confidence)
+        data['a05_answer'].append(llm_answer.a05.answer)
+        data['a05_confidence'].append(llm_answer.a05.confidence)
+        data['a06_answer'].append(llm_answer.a06.answer)
+        data['a06_confidence'].append(llm_answer.a06.confidence)
+        data['a07_answer'].append(llm_answer.a07.answer)
+        data['a07_confidence'].append(llm_answer.a07.confidence)
+        data['a08_answer'].append(llm_answer.a08.answer)
+        data['a08_confidence'].append(llm_answer.a08.confidence)
+        data['a09_answer'].append(llm_answer.a09.answer)
+        data['a09_confidence'].append(llm_answer.a09.confidence)
+        data['a10_answer'].append(llm_answer.a10.answer)
+        data['a10_confidence'].append(llm_answer.a10.confidence)
+        data['a11_answer'].append(llm_answer.a11.answer)
+        data['a11_confidence'].append(llm_answer.a11.confidence)
+
+    multiple_records_df = pd.DataFrame({
+        'a01_answer': data['a01_answer'],
+        'a01_confidence': data['a01_confidence'],
+        'a02_answer': data['a02_answer'],
+        'a02_confidence': data['a02_confidence'],
+        'a03_answer': data['a03_answer'],
+        'a03_confidence': data['a03_confidence'],
+        'a04_answer': data['a04_answer'],
+        'a04_confidence': data['a04_confidence'],
+        'a05_answer': data['a05_answer'],
+        'a05_confidence': data['a05_confidence'],
+        'a06_answer': data['a06_answer'],
+        'a06_confidence': data['a06_confidence'],
+        'a07_answer': data['a07_answer'],
+        'a07_confidence': data['a07_confidence'],
+        'a08_answer': data['a08_answer'],
+        'a08_confidence': data['a08_confidence'],
+        'a09_answer': data['a09_answer'],
+        'a09_confidence': data['a09_confidence'],
+        'a10_answer': data['a10_answer'],
+        'a10_confidence': data['a10_confidence'],
+        'a11_answer': data['a11_answer'],
+        'a11_confidence': data['a11_confidence'],
+    })
+    return predict_final_score(multiple_records_df)
+
+
+def predict_final_score(df):
+    model_path = '../packages/ml_model/random_forest_model.pkl'
+    with open(model_path, 'rb') as file:
+        loaded_model = pickle.load(file)
+        # Make sure the features columns order is the same as in the training dataset
+        columns = ['a01_answer', 'a01_confidence', 'a02_answer', 'a02_confidence',
+                   'a03_answer', 'a03_confidence', 'a04_answer', 'a04_confidence',
+                   'a05_answer', 'a05_confidence', 'a06_answer', 'a06_confidence',
+                   'a07_answer', 'a07_confidence', 'a08_answer', 'a08_confidence',
+                   'a09_answer', 'a09_confidence', 'a10_answer', 'a10_confidence',
+                   'a11_answer', 'a11_confidence']
+        df = df[columns]
+
+        predictions = loaded_model.predict(df)
+        return predictions
 
 @app.get("/review/example")
 async def calculate_review_trustworthiness():
