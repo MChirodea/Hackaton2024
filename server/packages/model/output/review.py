@@ -7,21 +7,21 @@ class AnswerResponse(BaseModel):
     confidence: float = Field(..., description="The model's confidence on the answer given. It's between 0 and 1.")
 
 class ReviewResponse(BaseModel):
-    """Represents the trustworthiness score of a review, based on multiple Answers to the questions and a trustworthiness score given by the model for that review"""
-
-    a01: AnswerResponse = Field(..., description="The answer to question Q01")
-    a02: AnswerResponse = Field(..., description="The answer to question Q02")
-    a03: AnswerResponse = Field(..., description="The answer to question Q03")
-    a04: AnswerResponse = Field(..., description="The answer to question Q04")
-    a05: AnswerResponse = Field(..., description="The answer to question Q05")
-    a06: AnswerResponse = Field(..., description="The answer to question Q06")
-    a07: AnswerResponse = Field(..., description="The answer to question Q07")
-    a08: AnswerResponse = Field(..., description="The answer to question Q08")
-    a09: AnswerResponse = Field(..., description="The answer to question Q09")
-    a10: AnswerResponse = Field(..., description="The answer to question Q10")
-    a11: AnswerResponse = Field(..., description="The answer to question Q11")
-    score: float = Field(..., description="The trustworthiness score of the review . It's between 0 and 1.")
+    """Represents the trustworthiness score of one review from the context correlated to the id supplied by the user. It's based on multiple answers to the questions and a trustworthiness score given by the model for that review"""
+    id: int = Field(..., description="The id of the review found in the context and the id found in the list supplied by the user")
+    a01: AnswerResponse = Field(..., description="The answer to question Q01 for the review found in the context by the id")
+    a02: AnswerResponse = Field(..., description="The answer to question Q02 for the review found in the context by the id")
+    a03: AnswerResponse = Field(..., description="The answer to question Q03 for the review found in the context by the id")
+    a04: AnswerResponse = Field(..., description="The answer to question Q04 for the review found in the context by the id")
+    a05: AnswerResponse = Field(..., description="The answer to question Q05 for the review found in the context by the id")
+    a06: AnswerResponse = Field(..., description="The answer to question Q06 for the review found in the context by the id")
+    a07: AnswerResponse = Field(..., description="The answer to question Q07 for the review found in the context by the id")
+    a08: AnswerResponse = Field(..., description="The answer to question Q08 for the review found in the context by the id")
+    a09: AnswerResponse = Field(..., description="The answer to question Q09 for the review found in the context by the id")
+    a10: AnswerResponse = Field(..., description="The answer to question Q10 for the review found in the context by the id")
+    a11: AnswerResponse = Field(..., description="The answer to question Q11 for the review found in the context by the id")
+    score: float = Field(..., description="The trustworthiness score of the review found in the context by the id. It's between 0 and 1.")
     
 class ReviewsResponse(BaseModel):
-    """A list with the trustworthiness score of each review sent by the user"""
+    """A list with the analysis results for the reviews found in the context with the id's supplied by the user"""
     reviews: list[ReviewResponse]

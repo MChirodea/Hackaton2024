@@ -1,5 +1,4 @@
 import ast
-import json
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,7 +58,19 @@ async def analyze(data: dict):
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
+    return {"request":formatted_reviews, "response":response}
+
+
+@app.get("/review/example")
+async def calculate_review_trustworthiness():
+    response = model.generate_response(product)
     return response
+
+@app.post("/review")
+async def calculate_review_trustworthiness_with_input(input: ReviewsInput):
+    response = model.generate_response(input)
+    return {"request":input, "response":response}
+
 
 def get_url(url: str):
     start_pattern = "^https://www.emag.ro/"
@@ -130,16 +141,6 @@ async def get_reviews(base_url: str):
         time.sleep(1)  # Add a delay to avoid hitting the API rate limit
 
     return all_reviews
-
-@app.get("/review/example")
-async def calculate_review_trustworthiness():
-    response = model.generate_response(product)
-    return response
-
-@app.post("/review")
-async def calculate_review_trustworthiness_with_input(input: ReviewsInput):
-    response = model.generate_response(input)
-    return response
 
 def convert_api_response_to_api_input(reviews, product_description, product_specifications):
     formatted_reviews = []
