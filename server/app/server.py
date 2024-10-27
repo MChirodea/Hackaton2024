@@ -68,7 +68,22 @@ async def analyze(data: dict):
     # If the LLM feedback is cached, return it
     if redis.exists(redis_product_llm_feedback_key):
         llm_feedback_json = json.loads(redis.get(redis_product_llm_feedback_key))
-        llm_feedback_obj = parse_obj_as(ReviewsInput, llm_feedback_json)
+        list = []
+        for review in llm_feedback_json['reviews']:
+            review_input = ReviewInput(
+                id=review["id"],
+                author_id=review["author_id"],
+                author_name=review["author_name"],
+                title=review["title"],
+                description=review["description"],
+                rating=review["rating"],
+                votes=review["votes"],
+                published_on=review["published_on"],
+                has_bought_product=review["has_bought_product"]
+            )
+            list.append(review_input)
+
+        llm_feedback_obj = ReviewsInput(reviews=list, description=llm_feedback_json['description'], specifications=llm_feedback_json['specifications'])
         llm_answers = llm_feedback_obj
     else:
         formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
