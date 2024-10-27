@@ -12,6 +12,7 @@ from packages.model.input.review import ReviewsInput
 from packages.model.input.review import ReviewInput, ReviewsInput
 from packages.model.model import LLMBrillio
 from packages.example.reviews import product
+from packages.model.output.review import ReviewsResponse
 
 load_dotenv()
 
@@ -57,7 +58,15 @@ async def analyze(data: dict):
         reviews = ast.literal_eval(redis.get(redis_product_reviews_key))
 
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
-    response = model.generate_response(formatted_reviews)
+    llm_answers: ReviewsResponse = model.generate_response(formatted_reviews)
+    response = []
+    for llm_answer in llm_answers.reviews:
+        response.append({
+            "id": llm_answer.id,
+            "score": llm_answer.score,
+            "summary": llm_answer.summary,
+        })
+
     return response
 
 
