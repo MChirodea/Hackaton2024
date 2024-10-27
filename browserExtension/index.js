@@ -114,13 +114,16 @@ async function detectFakeReviews() {
 
             let revRows = document.getElementsByClassName('product-review-item');
 
+            console.log('response', response);
             for (rev in response) {
+                console.log('rev', rev);
                 if (rev >= revRows.length) {
                     break;
                 }
 
                 // let reviewRow = document.querySelector(`[data-id="${response[rev].id}"]`);
                 let reviewRow = revRows[rev];
+                console.log('reviewRow', reviewRow);
                 let trustScore = response[rev].score * 100;
 
                 reviewRow.style.backgroundColor = trustScore <= 30 ? '#DF221414' : trustScore > 31 && trustScore < 70 ? '#FBC02D14' : '#1B870014';
