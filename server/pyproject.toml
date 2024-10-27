@@ -17,6 +17,7 @@ pydantic = "^2.8.2"
 langgraph = "^0.2.34"
 pandas = "^2.2.3"
 upstash-redis = "^1.2.0"
+scikit-learn="^1.5.2"
 
 [tool.poetry.group.dev.dependencies]
 langchain-cli = ">=0.0.31"
