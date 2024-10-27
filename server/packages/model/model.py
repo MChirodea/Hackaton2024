@@ -1,8 +1,10 @@
+from itertools import chain
 import os
-from langchain_openai import ChatOpenAI
+from time import sleep
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_chroma import Chroma
 
 from packages.model.input.review import ReviewsInput
 from packages.model.output.review import ReviewsResponse
@@ -10,20 +12,21 @@ from langchain_core.runnables import RunnablePassthrough
 
 
 system_prompt="""
-    You are tasked with analyzing a set of product reviews to determine their authenticity. For each review, assess and answer the following yes/no questions based on specific indicators commonly associated with fake reviews.
-    GENERATE AN ENTRY IN THE OUTPUT FOR EACH REVIEW THAT THE USER GAVE. EACH ENTRY NEEDS TO BE LINKED TO IT'S CORRESPONDING REVIEW FROM THE USER.
+    The user will provide a list containing id's of product reviews in the given context. You are tasked with analyzing the set of corresponding product reviews to determine their authenticity. 
+    For each review given by its id, assess and answer the following yes/no questions based on specific indicators commonly associated with fake reviews.
+    GENERATE AN ENTRY IN THE OUTPUT FOR EACH ID THAT THE USER GAVE. EACH ENTRY NEEDS TO BE LINKED TO IT'S CORRESPONDING REVIEW BY THE ID PROVIDED BY THE USER.
 
     The questions to be answered are the following:
-        Q01. Is the review very similar to at least another one in the list, and both have the rating?
+        Q01. Is the review very similar to at least another one in the context, and they have the same rating?
         Q02. Does the review focus too much on the scenery setting?
         Q03. Is the review grammatically correct?
-        Q04. Is the review about the product?
+        Q04. Is the review about the product in the context?
         Q05. Does the review have a low rating but contains positive text?
         Q06. Does the review transmit extreme love or hate emotions?
-        Q07. Does the reviewer have a generic or random profile name?
+        Q07. Does the author have a generic or random name?
         Q08. Does the review overuse certain words?
-        Q09. Does the review praise a competitor's product instead?
-        Q10. Is the review generic?
+        Q09. Does the review praise a competitor's product instead of the current product?
+        Q10. Is the review description generic?
         Q11. Is the review varied in length?
 
     Here are some additional considerations for each question:
@@ -40,12 +43,14 @@ system_prompt="""
         Length Variation (Q11): Consistently short or long reviews might be suspicious, especially if they lack substance or details.
 
         Additional Considerations:
-        Reviewer History: Look at the reviewer's history across other products and platforms to identify patterns or atypical behaviors.
-        Timing of Reviews Analyze the timing of reviews; a sudden influx of positive or negative reviews could indicate manipulation.
+        Reviewer History: Look at the author's history across other reviews to identify patterns or atypical behaviors.
+        Timing of Reviews: Analyze the timing of reviews; a sudden influx of positive or negative reviews could indicate manipulation.
         Language Tone Analysis: Check for consistent tone or repeated language among various reviews from different users.
-        External Data Points: Integrate data from other sources like IP location checks or account activity.
 
-    Use the following context for the format of the user input:
+    Answer based only on the following context:
+    {context}
+
+    Here is an explanation of the context:
         Product Description: (The description of the product)
         Product Specifications: (The specifications of the product)
         
@@ -81,6 +86,11 @@ system_prompt="""
                 Title: Great product!
                 Description: Loved using it. Highly recommend!
                 Published On: 2024-10-25 14:30:00
+
+        The user will ask questions in the following manner:
+            [id1, id2, id3]
+
+        Explanation: id1, id2, id3 represent the id's of the reviews to be analysed. They can be found in the context.
 """
 
 
@@ -96,13 +106,37 @@ class LLMBrillio:
     def __init_llm(model_name: str, key: str):
         model = ChatOpenAI(model_name=model_name, api_key=key).with_structured_output(ReviewsResponse)
         return model
+    
+    @staticmethod
+    def __create_context(input):
+        context = input.format_reviews()
+        vectorstore = Chroma.from_texts(
+            [context], embedding=OpenAIEmbeddings()
+        )
+        return vectorstore.as_retriever()
+    
+    @staticmethod
+    def __split_into_batches(lst, batch_size=10):
+        return [f"[{','.join(map(str, lst[i:i + batch_size]))}]" for i in range(0, len(lst), batch_size)]
+
 
     def generate_response(self, input: ReviewsInput) -> ReviewsResponse:
-        message = input.format_reviews()
+        
+        retriever = self.__create_context(input)
+
         retrieval_chain = (
-            {"question": RunnablePassthrough()}
+            {"context": retriever, "question": RunnablePassthrough()}
             | self.prompt
             | self.llm
-)
+        )
+        ids = [review.id for review in input.reviews]
 
-        return retrieval_chain.invoke(message)
+        questions = self.__split_into_batches(ids)
+        answers = []
+        for question in questions:
+            answer = retrieval_chain.invoke(question)
+            answers.append(answer)
+            sleep(2)
+
+        flattened_answers = ReviewsResponse(reviews = list(chain.from_iterable(answer.reviews for answer in answers)))
+        return {"question": ids, "answer": flattened_answers}

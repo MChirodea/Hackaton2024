@@ -39,7 +39,19 @@ async def analyze(data: dict):
     reviews = await get_reviews(data['url'])
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
+    return {"request":formatted_reviews, "response":response}
+
+
+@app.get("/review/example")
+async def calculate_review_trustworthiness():
+    response = model.generate_response(product)
     return response
+
+@app.post("/review")
+async def calculate_review_trustworthiness_with_input(input: ReviewsInput):
+    response = model.generate_response(input)
+    return {"request":input, "response":response}
+
 
 async def get_reviews(url: str):
     # Base URL for the API endpoint
@@ -109,16 +121,6 @@ async def get_reviews(url: str):
 
     return all_reviews
 
-@app.get("/review/example")
-async def calculate_review_trustworthiness():
-    response = model.generate_response(product)
-    return response
-
-@app.post("/review")
-async def calculate_review_trustworthiness_with_input(input: ReviewsInput):
-    response = model.generate_response(input)
-    return response
-
 def convert_api_response_to_api_input(reviews, product_description, product_specifications):
     formatted_reviews = []
     for review in reviews:
@@ -144,4 +146,4 @@ def convert_api_response_to_api_input(reviews, product_description, product_spec
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="192.168.40.195", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)
