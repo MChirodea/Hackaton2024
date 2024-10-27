@@ -7,7 +7,8 @@
       "default_popup": "index.html"
     },
     "icons": {
-        "24": "icons/icon24.png"
+        "24": "icons/icon24.png",
+        "128": "icons/icon128.png"
       },
     "background": {
         "service_worker": "background.js",
