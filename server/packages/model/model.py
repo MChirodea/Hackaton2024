@@ -87,20 +87,20 @@ system_prompt="""
                 Description: Loved using it. Highly recommend!
                 Published On: 2024-10-25 14:30:00
 
-        The user will ask questions in the following manner:
+        The user's input will be in the following format:
             [id1, id2, id3]
 
         Explanation: id1, id2, id3 represent the id's of the reviews to be analysed. They can be found in the context.
+
+        User input:
+        {question}
 """
 
 
 class LLMBrillio:
     def __init__(self, model_name: str = "gpt-4o-mini", key: str = os.environ["OPENAI_API_KEY"]):
         self.llm = self.__init_llm(model_name, key)
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            ("user", "{question}"),
-        ])
+        self.prompt = ChatPromptTemplate.from_template(system_prompt)
     
     @staticmethod
     def __init_llm(model_name: str, key: str):
@@ -139,4 +139,4 @@ class LLMBrillio:
             sleep(2)
 
         flattened_answers = ReviewsResponse(reviews = list(chain.from_iterable(answer.reviews for answer in answers)))
-        return {"question": ids, "answer": flattened_answers}
+        return flattened_answers
