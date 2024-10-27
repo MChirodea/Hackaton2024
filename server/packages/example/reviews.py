@@ -1,5 +1,5 @@
 from datetime import datetime
-from packages.model.input.review import ReviewInput, ReviewsInput
+from packages.llm_model.input.review import ReviewInput, ReviewsInput
 
 
 reviews = [
