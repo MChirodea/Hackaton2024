@@ -87,7 +87,7 @@ system_prompt="""
                 Description: Loved using it. Highly recommend!
                 Published On: 2024-10-25 14:30:00
 
-        The user will ask questions in the following manner:
+        The user's input will be in the following format:
             [id1, id2, id3]
 
         Explanation: id1, id2, id3 represent the id's of the reviews to be analysed. They can be found in the context.
@@ -139,4 +139,4 @@ class LLMBrillio:
             sleep(2)
 
         flattened_answers = ReviewsResponse(reviews = list(chain.from_iterable(answer.reviews for answer in answers)))
-        return {"question": ids, "answer": flattened_answers}
+        return flattened_answers
