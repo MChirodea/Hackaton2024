@@ -40,6 +40,7 @@ async def analyze(data: dict):
 
     redis_product_reviews_key = f"reviews:{base_url}"
     redis_product_review_count_key = f"review-count:{base_url}"
+    redis_product_llm_feedback_key = f"llm-feedback:{base_url}"
 
     number_of_reviews = data['total_reviews']
     number_of_cached_reviews = -1
@@ -56,9 +57,17 @@ async def analyze(data: dict):
         # Fetch cached reviews
         reviews = ast.literal_eval(redis.get(redis_product_reviews_key))
 
+    # If the LLM feedback is cached, return it
+    if redis.exists(redis_product_llm_feedback_key):
+        return ast.literal_eval(redis.get(redis_product_llm_feedback_key))
+    
     formatted_reviews = convert_api_response_to_api_input(reviews, data['description'], data['specifications'])
     response = model.generate_response(formatted_reviews)
-    return {"request":formatted_reviews, "response":response}
+
+    # Cache the LLM feedback
+    redis.set(redis_product_llm_feedback_key, f"{str(response)}")
+
+    return response
 
 
 @app.get("/review/example")
